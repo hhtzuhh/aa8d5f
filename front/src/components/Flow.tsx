@@ -9,21 +9,33 @@ import type { NodeProps } from '@xyflow/react';
 
 import type { ComponentType } from 'react';
 import axios from 'axios';
-import Modal from "@/components/ui/Modal";
-
+import FormDetailsModal from "@/components/ui/FormDetailsModal";
+import PrefillModal from "@/components/ui/PrefillModal";
 export default function Flow() {
+  // react flow node preparation
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal
+  
   const [selectedNode, setSelectedNode] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // FormDetailModal
+  const [isFormDetailsModalOpen, setIsFormDetailsModalOpen] = useState(false);
   
   const onNodeClick = useCallback((event: React.MouseEvent, node: any) => {
     setSelectedNode(node);
-    setIsModalOpen(true);
+    setIsFormDetailsModalOpen(true);
   }, []);
+  // PrefilModal
+  const [isPrefillModalOpen, setIsPrefillModalOpen] = useState(false);
+  const [editingFieldName, setEditingFieldName] = useState<string | null>(null);
+
+  // When user clicks ✎ edit a field
+  const handleEditField = (fieldName: string) => {
+    setEditingFieldName(fieldName);
+    setIsPrefillModalOpen(true);
+  };
+
   
   // 👇 customized node type
   const nodeTypes: Record<string, ComponentType<NodeProps>> = {
@@ -87,20 +99,21 @@ export default function Flow() {
         <Controls />
         <MiniMap />
       </ReactFlow>
-      <Modal 
-      isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      {selectedNode && (
-        <div>
-          <h2 className="text-lg font-bold mb-2">{selectedNode.data.label}</h2>
-          <p className="text-gray-600 text-sm">
-            {selectedNode.data.form 
-              ? `${Object.keys(selectedNode.data.form?.field_schema?.properties || {}).length} fields`
-              : "No form details"}
-          </p>
-        </div>
-      )}
-    </Modal>
 
+      <FormDetailsModal 
+          isOpen={isFormDetailsModalOpen}
+          onClose={() => setIsFormDetailsModalOpen(false)}
+          selectedNode={selectedNode}
+          onEditField={handleEditField}
+        />
+
+      <PrefillModal
+        isOpen={isPrefillModalOpen}
+        onClose={() => setIsPrefillModalOpen(false)}
+        fieldName={editingFieldName}
+        availableSources={[]}
+        onSelectPrefillSource={(formId, field) => {}} // no logic yet
+        />
     </div>
   );
 }
