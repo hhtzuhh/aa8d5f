@@ -1,11 +1,9 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button"
-
+import Flow from '@/components/Flow';
 export default function Home() {
   return (
     <div>
       Hello
-      <Button>Click me</Button>
+      <Flow/>    
     </div>
   );
 }
