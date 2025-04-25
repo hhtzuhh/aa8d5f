@@ -11,6 +11,11 @@ import type { ComponentType } from 'react';
 import axios from 'axios';
 import FormDetailsModal from "@/components/ui/FormDetailsModal";
 import PrefillModal from "@/components/ui/PrefillModal";
+
+import { findAvailableSources, findParentNodes } from '@/lib/prefill';
+
+
+
 export default function Flow() {
   // react flow node preparation
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -18,6 +23,8 @@ export default function Flow() {
   const [loading, setLoading] = useState(true);
   
   const [selectedNode, setSelectedNode] = useState<any>(null);
+  
+  const [availableSources, setAvailableSources] = useState<{ fromFormId: string, fromFieldName: string }[]>([]);
 
   // FormDetailModal
   const [isFormDetailsModalOpen, setIsFormDetailsModalOpen] = useState(false);
@@ -26,16 +33,19 @@ export default function Flow() {
     setSelectedNode(node);
     setIsFormDetailsModalOpen(true);
   }, []);
-  // PrefilModal
+  // PrefillModal
   const [isPrefillModalOpen, setIsPrefillModalOpen] = useState(false);
   const [editingFieldName, setEditingFieldName] = useState<string | null>(null);
 
   // When user clicks ✎ edit a field
   const handleEditField = (fieldName: string) => {
+    if (!selectedNode) return;
+    const sources = findAvailableSources(selectedNode, nodes, edges);
+    setAvailableSources(sources);   // <-- update here
     setEditingFieldName(fieldName);
     setIsPrefillModalOpen(true);
   };
-
+  console.log("ava", availableSources);
   
   // 👇 customized node type
   const nodeTypes: Record<string, ComponentType<NodeProps>> = {
@@ -111,7 +121,7 @@ export default function Flow() {
         isOpen={isPrefillModalOpen}
         onClose={() => setIsPrefillModalOpen(false)}
         fieldName={editingFieldName}
-        availableSources={[]}
+        availableSources={availableSources}
         onSelectPrefillSource={(formId, field) => {}} // no logic yet
         />
     </div>
