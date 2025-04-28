@@ -21,7 +21,7 @@ export default function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(true);
-  
+  console.log("nodes", nodes);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   
   const [availableSources, setAvailableSources] = useState<{ fromFormId: string, fromFieldName: string }[]>([]);
@@ -36,12 +36,13 @@ export default function Flow() {
   // PrefillModal
   const [isPrefillModalOpen, setIsPrefillModalOpen] = useState(false);
   const [editingFieldName, setEditingFieldName] = useState<string | null>(null);
-
+  console.log("selectedNode", selectedNode);
+  console.log("editingFieldName", editingFieldName); // button or dynamic_check_box
   // When user clicks ✎ edit a field
   const handleEditField = (fieldName: string) => {
     if (!selectedNode) return;
     const sources = findAvailableSources(selectedNode, nodes, edges);
-    setAvailableSources(sources);   // <-- update here
+    setAvailableSources(sources);   
     setEditingFieldName(fieldName);
     setIsPrefillModalOpen(true);
   };
@@ -69,6 +70,7 @@ export default function Flow() {
               label: node.data?.name ?? "Unnamed",
               component_id: node.data?.component_id ?? null,
               form: matchingForm || null,  // pass whole form object into data!
+              input_mapping: node.data?.input_mapping ?? {},
             } as FormNodeData,
           };
         });
@@ -91,6 +93,78 @@ export default function Flow() {
     fetchGraph();
   }, []);
 
+  const handleSelectPrefillSource = (fromFormId: string, fromSourceLabel: string, fromFieldName: string) => {
+    // the fromFieldName is the name you select: so probaly button
+    if (!selectedNode || !editingFieldName) return;
+  
+    // 1. Update nodes
+    setNodes((nds) =>
+      nds.map((n) => 
+        n.id === selectedNode.id
+          ? {
+              ...n,
+              data: {
+                ...n.data,
+                input_mapping: {
+                  ...(n.data.input_mapping || {}),
+                  [editingFieldName]: {
+                    fromFormId,
+                    fromFieldName,
+                    fromSourceLabel
+                  },
+                },
+              },
+            }
+          : n
+      )
+    );
+  
+    // 2. Update selectedNode
+    setSelectedNode((prev: any) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        input_mapping: {
+          ...(prev.data.input_mapping || {}),
+          [editingFieldName]: {
+            fromFormId,
+            fromFieldName,
+            fromSourceLabel
+          },
+        },
+      },
+    }));
+  
+    // 3. Close modal
+    setIsPrefillModalOpen(false);
+    setEditingFieldName(null);
+  };
+  
+  const handleClearPrefill = (fieldName: string) => {
+    if (!selectedNode) return;
+  
+    // 1. Create updated input_mapping
+    const updatedMapping = { ...(selectedNode.data.input_mapping || {}) };
+    delete updatedMapping[fieldName];  // remove the selected field
+  
+    // 2. Create updated node
+    const updatedNode = {
+      ...selectedNode,
+      data: {
+        ...selectedNode.data,
+        input_mapping: updatedMapping,
+      },
+    };
+  
+    // 3. Update nodes list
+    setNodes((nds) =>
+      nds.map((n) => (n.id === updatedNode.id ? updatedNode : n))
+    );
+  
+    // 4. Update selected node (to reflect immediately in modal)
+    setSelectedNode(updatedNode);
+  };
+  
   if (loading) {
     return <div>Loading graph...</div>;
   }
@@ -115,6 +189,7 @@ export default function Flow() {
           onClose={() => setIsFormDetailsModalOpen(false)}
           selectedNode={selectedNode}
           onEditField={handleEditField}
+          onClearPrefill={handleClearPrefill}
         />
 
       <PrefillModal
@@ -122,7 +197,7 @@ export default function Flow() {
         onClose={() => setIsPrefillModalOpen(false)}
         fieldName={editingFieldName}
         availableSources={availableSources}
-        onSelectPrefillSource={(formId, field) => {}} // no logic yet
+        onSelectPrefillSource={handleSelectPrefillSource}
         />
     </div>
   );

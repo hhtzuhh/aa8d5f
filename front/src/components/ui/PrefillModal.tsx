@@ -63,7 +63,7 @@ export default function PrefillModal({
                       <button
                         key={field}
                         className="text-left text-sm p-1 hover:bg-gray-50 rounded"
-                        onClick={() => onSelectPrefillSource(sourceGroup.id, field)}
+                        onClick={() => onSelectPrefillSource(sourceGroup.id, sourceGroup.label, field)}
                       >
                         {field}
                       </button>
