@@ -11,34 +11,39 @@ import type { ComponentType } from 'react';
 import axios from 'axios';
 import FormDetailsModal from "@/components/ui/FormDetailsModal";
 import PrefillModal from "@/components/ui/PrefillModal";
+import type { Node, Edge } from '@xyflow/react';
 
 import { findAvailableSources, findParentNodes } from '@/lib/prefill';
 
-
+// import {MyNode} from "@/components/type/node";
 
 export default function Flow() {
   // react flow node preparation
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(true);
-  console.log("nodes", nodes);
-  const [selectedNode, setSelectedNode] = useState<any>(null);
-  
-  const [availableSources, setAvailableSources] = useState<{ fromFormId: string, fromFieldName: string }[]>([]);
 
-  // FormDetailModal
+  // the selectedNode that are used for rendering UI in FormDetailsModal.
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  // availableSource are passed into PrefillModal to show available options
+  const [availableSources, setAvailableSources] = useState<{ id: string, label: string, fields: string[];}[]>([]);
+
+  // FormDetailModal open state
   const [isFormDetailsModalOpen, setIsFormDetailsModalOpen] = useState(false);
   
+  // PrefillModal open state
+  const [isPrefillModalOpen, setIsPrefillModalOpen] = useState(false);
+  // the field that from selected Node
+  const [editingFieldName, setEditingFieldName] = useState<string | null>(null);
+
   const onNodeClick = useCallback((event: React.MouseEvent, node: any) => {
     setSelectedNode(node);
     setIsFormDetailsModalOpen(true);
   }, []);
-  // PrefillModal
-  const [isPrefillModalOpen, setIsPrefillModalOpen] = useState(false);
-  const [editingFieldName, setEditingFieldName] = useState<string | null>(null);
-  console.log("selectedNode", selectedNode);
-  console.log("editingFieldName", editingFieldName); // button or dynamic_check_box
-  // When user clicks ✎ edit a field
+
+
+
+  // When user clicks UI to edit a field
   const handleEditField = (fieldName: string) => {
     if (!selectedNode) return;
     const sources = findAvailableSources(selectedNode, nodes, edges);
@@ -46,7 +51,6 @@ export default function Flow() {
     setEditingFieldName(fieldName);
     setIsPrefillModalOpen(true);
   };
-  console.log("ava", availableSources);
   
   // 👇 customized node type
   const nodeTypes: Record<string, ComponentType<NodeProps>> = {

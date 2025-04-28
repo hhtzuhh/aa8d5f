@@ -2,14 +2,8 @@
 
 import Modal from "@/components/ui/Modal"; 
 import { TiDeleteOutline } from "react-icons/ti";
+import {FormDetailsModalProps} from "@/components/type/ModalProp";
 
-type FormDetailsModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedNode: any;
-  onEditField: (fieldName: string) => void;
-  onClearPrefill: (fieldName: string) => void;
-};
 
 export default function FormDetailsModal({
   isOpen,

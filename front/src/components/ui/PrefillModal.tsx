@@ -2,20 +2,7 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-
-type PrefillSourceGroup = {
-  id: string;
-  label: string;
-  fields: string[];
-};
-
-type PrefillModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  fieldName: string | null;
-  availableSources: PrefillSourceGroup[];
-  onSelectPrefillSource: (fromFormId: string, fromFieldName: string) => void;
-};
+import {PrefillSourceGroup, PrefillModalProps} from "@/components/type/ModalProp";
 
 export default function PrefillModal({
   isOpen,
