@@ -10,6 +10,7 @@ https://fluttering-atmosphere-1b5.notion.site/Journey-Builder-React-Coding-Chall
 
 2. run the mock server
 ```bash
+    cd frontendchallengeserver
     npm start
 ```
 
