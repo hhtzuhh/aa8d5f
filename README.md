@@ -22,6 +22,10 @@ https://fluttering-atmosphere-1b5.notion.site/Journey-Builder-React-Coding-Chall
 ```
 
 
+[Click here to view the PDF](./doc/challenge.pdf)
+
+
+
 
 
 
